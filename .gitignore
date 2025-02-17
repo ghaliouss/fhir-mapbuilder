@@ -9,8 +9,8 @@ out
 node_modules
 .vscode-test
 */node_modules/
-.vscode/settings.json
 *.vsix
+*.jar
 vsc-extension-quickstart*
 package-lock.json
 dist
