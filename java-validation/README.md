@@ -42,9 +42,9 @@ mvn versions:use-latest-versions
 
 **Parameters:**
 
-- ```source``` (String) - The source FML file.
+- ```source``` (String) - The path of the source FML file.
 
-- ```data``` (String) - The data to be transformed.
+- ```data``` (String) - The path of the data to be transformed.
 
 - ```output``` (String) - The output path for the transformed data.
 
@@ -57,7 +57,7 @@ mvn versions:use-latest-versions
 **Example Request:**
 
 ```shell
-curl -X GET "http://localhost:8080/api/matchbox/validate?source=example.fml&data=input.json&output=output.json"
+curl -X GET "http://localhost:8080/api/matchbox/validate?source=path.example.fml&data=path.input.json&output=path.output"
 ```
 ### Reset and Reload MatchBox Engine
 
@@ -65,7 +65,7 @@ curl -X GET "http://localhost:8080/api/matchbox/validate?source=example.fml&data
 
 **Parameters:**
 
-- ```path``` (String) - The path to the engine configuration.
+- ```path``` (String) - The path of the IG package.
 
 **Response:**
 
@@ -76,7 +76,7 @@ curl -X GET "http://localhost:8080/api/matchbox/validate?source=example.fml&data
 **Example Request:**
 
 ```shell
-curl -X GET "http://localhost:8080/api/matchbox/resetAndLoadEngine?path=config.json"
+curl -X GET "http://localhost:8080/api/matchbox/resetAndLoadEngine?path=path.ig.package"
 ```
 
 ### Health Check
