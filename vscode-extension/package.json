@@ -5,6 +5,7 @@
   "icon": "ext-images/icon.ico",
   "version": "1.0.0",
   "publisher": "aphp",
+  "readme": "README.md",
   "author": {
     "name": "Management Stratégique des Données (AP-HP)"
   },
