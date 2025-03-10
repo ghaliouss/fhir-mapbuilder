@@ -1,38 +1,13 @@
 # MapBuilder Validation
 
-The goal of this project is to implement a REST API that allows the MapBuilder extension to perform compilation, validation, and transformation of an FML (FHIR Mapping Language) file provided by MatchBox through REST calls.
+The goal of this project is to implement a REST API base on [The MatchBox Engine](https://github.com/ahdis/matchbox), from agile health data information systems,  that allows the MapBuilder extension to perform compilation, validation, and transformation of an FML (FHIR Mapping Language) file provided by MatchBox through REST calls.
 
 This application helps the alignment designer use FML without errors by ensuring syntactic validation.
 
-[MatchBox Engine](https://github.com/ahdis/matchbox) is included in the application to manage the different processing stages.
 
-## Inclusion of MatchBox Engine
+## MatchBox Engine Dependency
 
-MatchBox Engine is included in the project. It can be found in the pom.xml file located at the root of the project.
-At the time of writing this documentation, the version used is **3.9.12**.
-
-### Changing the Fixed Version of MatchBox Engine
-
-The version of MatchBox Engine is specified in the pom.xml file. It can be manually changed by updating the version number and then downloading the new dependency.
-To resolve the dependency, use the command:
-
-```shell
-mvn dependency:resolve
-```
-
-Alternatively, Maven can manage dependency versions automatically.
-First, check for available updates with:
-
-```shell
-mvn versions:display-dependency-updates
-```
-
-Then, update to the latest versions with:
-
-```shell
-mvn versions:use-latest-versions
-```
-
+The project use the MatchBox Engine dependency, specifically version 3.9.12.
 
 ## API Endpoints
 

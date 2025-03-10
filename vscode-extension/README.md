@@ -89,5 +89,5 @@ Autocompletion for attributes is triggered when an object is followed by a dot (
 
 ## 📜 License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [MIT License](./LICENSE).
 
