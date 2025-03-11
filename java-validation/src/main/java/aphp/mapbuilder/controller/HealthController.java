@@ -1,4 +1,4 @@
-package aphp.mapbuilder.controllers;
+package aphp.mapbuilder.controller;
 
 import aphp.mapbuilder.MatchBoxApplication;
 import org.springframework.http.HttpStatus;

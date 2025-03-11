@@ -1,4 +1,4 @@
-package aphp.mapbuilder.Models;
+package aphp.mapbuilder.model;
 
 public class ValidationError extends Exception {
     public ValidationError(String message) {

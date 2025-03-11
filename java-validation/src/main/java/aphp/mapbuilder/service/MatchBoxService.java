@@ -1,8 +1,8 @@
-package aphp.mapbuilder.Services;
+package aphp.mapbuilder.service;
 
-import aphp.mapbuilder.Models.CompilationError;
-import aphp.mapbuilder.Models.TransformationError;
-import aphp.mapbuilder.Models.ValidationError;
+import aphp.mapbuilder.model.CompilationError;
+import aphp.mapbuilder.model.TransformationError;
+import aphp.mapbuilder.model.ValidationError;
 import aphp.mapbuilder.utils.FileUtils;
 import ch.ahdis.matchbox.engine.MatchboxEngine;
 import ch.ahdis.matchbox.engine.ValidationPolicyAdvisor;

@@ -1,4 +1,4 @@
-package aphp.mapbuilder.Models;
+package aphp.mapbuilder.model;
 
 public class TransformationError extends Exception {
     public TransformationError(String message) {
