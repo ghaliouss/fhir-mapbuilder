@@ -1,4 +1,4 @@
-package aphp.mapbuilder.controller;
+package fr.aphp.mapbuilder.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;

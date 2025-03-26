@@ -1,4 +1,4 @@
-package aphp.mapbuilder.utils;
+package fr.aphp.mapbuilder.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

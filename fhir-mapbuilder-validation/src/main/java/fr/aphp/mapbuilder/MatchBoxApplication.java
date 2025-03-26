@@ -1,6 +1,6 @@
-package aphp.mapbuilder;
+package fr.aphp.mapbuilder;
 
-import aphp.mapbuilder.service.MatchBoxService;
+import fr.aphp.mapbuilder.service.MatchBoxService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

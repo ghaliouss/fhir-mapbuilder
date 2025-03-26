@@ -11,7 +11,7 @@
     </parent>
 
     <groupId>fr.aphp</groupId>
-    <artifactId>map-builder-validation</artifactId>
+    <artifactId>fhir-mapbuilder-validation</artifactId>
     <version>1.0.0</version>
 
     <dependencies>
@@ -46,7 +46,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>aphp.mapbuilder.MatchBoxApplication</mainClass>
+                    <mainClass>fr.aphp.mapbuilder.MatchBoxApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>

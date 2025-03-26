@@ -1,6 +1,6 @@
-package aphp.mapbuilder.controller;
+package fr.aphp.mapbuilder.controller;
 
-import aphp.mapbuilder.MatchBoxApplication;
+import fr.aphp.mapbuilder.MatchBoxApplication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

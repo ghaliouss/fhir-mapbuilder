@@ -1,8 +1,8 @@
-package aphp.mapbuilder.controller;
+package fr.aphp.mapbuilder.controller;
 
-import aphp.mapbuilder.model.TransformationError;
-import aphp.mapbuilder.model.ValidationError;
-import aphp.mapbuilder.service.MatchBoxService;
+import fr.aphp.mapbuilder.model.TransformationError;
+import fr.aphp.mapbuilder.model.ValidationError;
+import fr.aphp.mapbuilder.service.MatchBoxService;
 import org.hl7.fhir.r4.model.StructureMap;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package aphp.mapbuilder.config;
+package fr.aphp.mapbuilder.config;
 
 import ch.ahdis.matchbox.engine.MatchboxEngine;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
