@@ -16,3 +16,4 @@ package-lock.json
 dist
 dist/
 */dist/
+*/target/
