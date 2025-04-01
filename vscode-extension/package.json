@@ -1,5 +1,5 @@
 {
-  "name": "fhir-mapbuilder",
+  "name": "map-builder",
   "displayName": "FHIR MapBuilder",
   "description": "This extension helps the alignment designer use FML without errors through features like syntax highlighting, autocompletion, and both syntax and algorithmic validation of the StructureMap resource using the matchbox engine .",
   "icon": "ext-images/icon.ico",
@@ -7,7 +7,7 @@
   "publisher": "aphp",
   "readme": "README.md",
   "author": {
-    "name": "Management Stratégique des Données (AP-HP)"
+    "name": "AP-HP"
   },
   "repository": {
     "type": "git",
