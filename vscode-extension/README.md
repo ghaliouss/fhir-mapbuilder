@@ -17,6 +17,8 @@ This extension assists users by offering the following features:
 This function works thanks to the java package map-builder-validation.jar: the springboot REST API based on 
 [the matchbox-engine](https://github.com/ahdis/matchbox), provided in the target folder.
 
+There is only one engine running, regardless the number of VSCode instance running. It is therefor strongly discouraged to have two FHIR IG oppened in two VSCode instances simultaneously. 
+
 This function have 3 inputs:
 - **FML file** to test (required)
 - **JSON file**, that is an instance of the source StructureDefinition - as defined in the fml file to test (required)
