@@ -2,7 +2,7 @@
 
 # 1.0.0 (2024-02-05)
 
-* Refactoring of the Matchbox application: called map-builder-validation via REST requests and optimized.
+* Refactoring of the Matchbox application: called fhir-mapbuilder-validation via REST requests and optimized.
 * Added a new command to validate the StructureMap and edit test parameters.
 * Added a command to reset and load the Matchbox engine and load the current IG package.
 

@@ -1,12 +1,5 @@
 import { CompletionItem } from 'vscode';
 
-export type FhirContents = {
-  resourceType: string;
-  type?: string;
-  kind?: string;
-  derivation?: string;
-};
-
 export type ElementInfo = {
   path: string;
   types: string[];

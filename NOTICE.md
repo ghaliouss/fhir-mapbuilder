@@ -1,4 +1,4 @@
-Project: MapBuilder
+Project: FHIR MapBuilder
 
 Author: AP-HP
 
@@ -11,4 +11,5 @@ Third-party components used in this project:
 
   Licensed under MIT License
 
-
+FHIR® is the registered trademark of HL7 and is used with the permission of HL7.
+Use of the FHIR trademark does not constitute endorsement of the contents of this repository by HL7

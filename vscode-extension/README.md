@@ -4,6 +4,9 @@
 FHIR MapBuilder is a Visual Studio Code extension designed to facilitate the edition of FHIR StructureMap resources 
 using FHIR Mapping Language (FML).
 
+FHIR® is the registered trademark of HL7 and is used with the permission of HL7.
+Use of the FHIR trademark does not constitute endorsement of the contents of this repository by HL7
+
 This extension assists users by offering the following features:
 - Syntax highlighting
 - Autocompletion

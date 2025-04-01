@@ -1,6 +1,6 @@
 MIT License
 
-2025 MapBuilder © Assistance Publique – Hôpitaux de Paris
+2025 FHIR MapBuilder © Assistance Publique – Hôpitaux de Paris
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
