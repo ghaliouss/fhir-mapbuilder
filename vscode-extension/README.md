@@ -14,19 +14,20 @@ This extension assists users by offering the following features:
 - StructureMap validation on test data
 
 ## FML execution on test data
-This function works thanks to the java package map-builder-validation.jar the springboot REST API based on 
+This function works thanks to the java package map-builder-validation.jar: the springboot REST API based on 
 [the matchbox-engine](https://github.com/ahdis/matchbox), provided in the target folder.
 
-This function have 3 inputs :
+There is only one engine running, regardless the number of VSCode instance running. It is therefor strongly discouraged to have two FHIR IG oppened in two VSCode instances simultaneously. 
+
+This function have 3 inputs:
 - **FML file** to test (required)
 - **JSON file**, that is an instance of the source StructureDefinition - as defined in the fml file to test (required)
-- **Implementation Guide (IG) package** that contains the StructureDefinition (logical model) that are `uses` in the fml 
-- file `as sources` (optional).
+- **Implementation Guide (IG) package** that contains the StructureDefinition (logical model) that are declared `as sources` in the fml `uses` (optional).
 
 It may generate 3 files in the **fml-generated** folder:
 - YYYY_MM_DD_HH_MM_SS_result.json: Stores the transformation result of the FML with the dataset (the output of the $transform operation).
 - YYYY_MM_DD_HH_MM_SS_error.json: Contains all validation error messages related to the FML.
-- YYYY_MM_DD_HH_MM_SS_params.log: Logs the files used during the process, including the FML file and the test instance and the package id (if any).
+- YYYY_MM_DD_HH_MM_SS_params.log: Logs the files used during the process, including the FML file and the test instance.
 
 Additional information is also displayed in the FHIR MapBuilder Validation output channel of Visual Studio Code.
 
