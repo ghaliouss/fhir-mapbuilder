@@ -37,7 +37,7 @@
       "notIn": [ "string", "comment" ]
     },
     {
-      "open": "/**",
+      "open": "/*",
       "close": " */",
       "notIn": [ "string" ]
     }
