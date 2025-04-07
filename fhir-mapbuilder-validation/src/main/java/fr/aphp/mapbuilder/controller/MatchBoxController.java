@@ -70,6 +70,22 @@ public class MatchBoxController {
         }
     }
 
+    @GetMapping("/parse")
+    public ResponseEntity<String> parse(
+            @RequestParam String source) {
+
+        log.info("Get Parsing Request, source:{}", source);
+
+        try {
+            matchBoxService.parse(source);
+            return ResponseEntity.ok("structureMap is parsed!");
+
+        } catch (Exception e) {
+            log.error("Unexpected error during parsing process", e);
+            return createErrorResponse("Unexpected error: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/resetAndLoadEngine")
     public ResponseEntity<Boolean> path(@RequestParam String path) {
         boolean result = this.matchBoxService.resetAndLoadEngine(List.of(path));

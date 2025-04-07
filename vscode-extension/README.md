@@ -14,7 +14,7 @@ This extension assists users by offering the following features:
 - StructureMap validation on test data
 
 ## FML execution on test data
-This function works thanks to the java package map-builder-validation.jar: the springboot REST API based on 
+This function works thanks to the java package fhir-mapbuilder-validation.jar: the springboot REST API based on 
 [the matchbox-engine](https://github.com/ahdis/matchbox), provided in the target folder.
 
 There is only one engine running, regardless the number of VSCode instance running. It is therefor strongly discouraged to have two FHIR IG oppened in two VSCode instances simultaneously. 

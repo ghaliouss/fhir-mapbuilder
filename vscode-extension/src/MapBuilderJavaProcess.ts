@@ -6,7 +6,7 @@ import {logData} from "./utils";
 export class MapBuilderJavaProcess {
     mapBuilderValidationLogger: OutputChannel;
     config: WorkspaceConfiguration;
-    private extensionPublisher: string = 'aphp.map-builder';
+    private extensionPublisher: string = 'aphp.fhir-mapbuilder';
 
 
     constructor(validationOutputChannel: OutputChannel) {
@@ -44,7 +44,7 @@ export class MapBuilderJavaProcess {
     }
 
     private buildShellCommand() {
-        const jarName = this.config.get("jarName") === "" ? "map-builder-validation" : this.config.get("jarName");
+        const jarName = this.config.get("jarName") === "" ? "fhir-mapbuilder-validation" : this.config.get("jarName");
         const command = "java"; // Java executable
 
         const args = [

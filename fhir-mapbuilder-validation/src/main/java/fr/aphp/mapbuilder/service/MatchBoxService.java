@@ -1,6 +1,7 @@
 package fr.aphp.mapbuilder.service;
 
 import fr.aphp.mapbuilder.model.CompilationError;
+import fr.aphp.mapbuilder.model.ParsingError;
 import fr.aphp.mapbuilder.model.TransformationError;
 import fr.aphp.mapbuilder.model.ValidationError;
 import fr.aphp.mapbuilder.utils.FileUtils;
@@ -28,13 +29,12 @@ import java.util.List;
 @Service
 public class MatchBoxService {
 
-
     private MatchboxEngine engine;
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MatchBoxService.class);
 
     private String paramsPath;
     private String resultPath;
-    private String errorPath;
+    private String qualityAssessmentPath;
 
 
     public MatchBoxService(@Qualifier("matchboxEngineR4") MatchboxEngine matchboxEngine) {
@@ -52,30 +52,40 @@ public class MatchBoxService {
         String dateTime = FileUtils.generateDateTimeFormatForPath();
         paramsPath = folder + "\\" + dateTime + "_params.log";
         resultPath = folder + "\\" + dateTime + "_result.json";
-        errorPath = folder + "\\" + dateTime + "_error.json";
+        qualityAssessmentPath = folder + "\\" + dateTime + "_qa.json";
 
     }
 
-    // method of compiling a structure map, a problem has been found once the structure is in the engine, you have to drop it or it won't be replaced.
     public StructureMap compile(String source) throws CompilationError {
         try {
-            if (source == null) {
-                log.error("source is null!");
+            log.info("Start Compiling fml");
+            StructureMap sm = parse(source);
+            if (sm == null) {
+                log.error("StructureMap is null!");
                 return null;
             }
-            log.info("Start FML to StructureMap conversion");
-            final StructureMap sm = engine.parseMap(Files.readString(Path.of(source)));
-            if (engine.getContext().hasResource(org.hl7.fhir.r5.model.StructureMap.class, sm.getUrl())) {
-                engine.getContext().dropResource(engine.getContext().fetchResource(org.hl7.fhir.r5.model.StructureMap.class, sm.getUrl()));
-            }
-            engine.addCanonicalResource(sm);
-            log.info("End of conversion");
 
             FileUtils.writeFile(paramsPath, "FML : \n\n" + sm + "\n\n", false);
+            log.info("End compiling");
             return sm;
-
         } catch (Exception exception) {
-            throw new CompilationError("Error during compilation process inside the compile method, message:");
+            throw new CompilationError("Error during compilation process: " + exception.getMessage());
+        }
+    }
+
+    public StructureMap parse(String source) throws ParsingError {
+        try {
+            if (source == null) {
+                log.error("Source is null!");
+                return null;
+            }
+
+            String content = Files.readString(Path.of(source));
+            StructureMap sm = engine.parseMap(content);
+            handleExistingResource(sm);
+            return sm;
+        } catch (Exception exception) {
+            throw new ParsingError("Error during parsing process: ", exception);
         }
     }
 
@@ -94,7 +104,7 @@ public class MatchBoxService {
 
             // Write the json to a file to ensure the persistence of the information if we need to persist information
             if (!messages.isEmpty()) {
-                FileUtils.writeFile(errorPath, FileUtils.serializeListObject(validate), false);
+                FileUtils.writeFile(qualityAssessmentPath, FileUtils.serializeListObject(validate), false);
             }
 
         } catch (Exception exception) {
@@ -181,6 +191,13 @@ public class MatchBoxService {
 
         return success;
     }
-
+    private void handleExistingResource(StructureMap sm) {
+        if (engine.getContext().hasResource(org.hl7.fhir.r5.model.StructureMap.class, sm.getUrl())) {
+            engine.getContext().dropResource(
+                    engine.getContext().fetchResource(org.hl7.fhir.r5.model.StructureMap.class, sm.getUrl())
+            );
+        }
+        engine.addCanonicalResource(sm);
+    }
 
 }

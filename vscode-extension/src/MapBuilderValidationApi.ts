@@ -8,7 +8,6 @@ export class MapBuilderValidationApi {
 
     mapBuilderValidationLogger: OutputChannel;
 
-
     constructor(validationOutputChannel: OutputChannel) {
         this.mapBuilderValidationLogger = validationOutputChannel;
     }
@@ -33,6 +32,28 @@ export class MapBuilderValidationApi {
             return true;
         } catch (error) {
             const result = `Error invoking matchbox validate: ${error}`;
+            logData(result, this.mapBuilderValidationLogger);
+            return false;
+        }
+    }
+
+    // Call the matchbox to parse structure map
+    public async callParseStructureMap(filePath: string): Promise<boolean> {
+        try {
+            const isRunning = await this.isAppRunning();
+            if (!isRunning) {
+                // Wait for the Java process to initialize
+                logData(`Waiting for the java application to start...`, this.mapBuilderValidationLogger);
+                await this.waitForJavaAppReady();
+            }
+            const url = `${ApiConstants.parseUrl}?source=${encodeURIComponent(filePath)}`;
+            logData(`Invoking matchbox parse: URL= ${url}`, this.mapBuilderValidationLogger);
+            const response = await axios.get(url);
+            const result = `Parsing response status: ${response.status}, Parsing response data: ${response.data}`;
+            logData(result, this.mapBuilderValidationLogger);
+            return response.status === 200;
+        } catch (error) {
+            const result = `Error invoking matchbox parsing: ${error}`;
             logData(result, this.mapBuilderValidationLogger);
             return false;
         }
@@ -80,15 +101,12 @@ export class MapBuilderValidationApi {
     private buildValidateUrl(): string {
         let url = ApiConstants.validateUrl;
 
-        // Retrieve configuration values
         const outputFolderName = "fml-generated";
 
         const outputPath = this.getWorkspacePathOrHomeDir();
 
-        // Get source file path
         const sourcePath = this.getSourceFilePath();
 
-        // Append parameters to the URL
         url = `${url}?source=${encodeURIComponent(sourcePath)}`;
 
         const config = workspace.getConfiguration('MapBuilder');
@@ -120,7 +138,7 @@ export class MapBuilderValidationApi {
                 }
             } catch (error) {
                 // Log errors but continue polling
-                logData(`Waiting for Java application. Attempt ${retries + 1}/${maxRetries} failed.`, this.mapBuilderValidationLogger);
+                logData(`Waiting for java application. Attempt ${retries + 1}/${maxRetries} failed.`, this.mapBuilderValidationLogger);
             }
 
             retries++;

@@ -1,5 +1,5 @@
 {
-  "name": "map-builder",
+  "name": "fhir-mapbuilder",
   "displayName": "FHIR MapBuilder",
   "description": "This extension helps the alignment designer use FML without errors through features like syntax highlighting, autocompletion, and both syntax and algorithmic validation of the StructureMap resource using the matchbox engine .",
   "icon": "ext-images/icon.ico",
@@ -39,7 +39,7 @@
         "MapBuilder.IncludeWorkingPackage": {
           "type": "boolean",
           "default": true,
-          "description": "Whether or not to include the work package to add it to the engine inside MapBuilder Validation"
+          "description": "Whether or not to include the work package to add it to the engine inside fhir-mapbuilder-validation"
         },
         "MapBuilder.dataFile": {
           "type": "string",
@@ -49,7 +49,12 @@
         "MapBuilder.jarName": {
           "type": "string",
           "default": "fhir-mapbuilder-validation",
-          "description": "Jar name from package created with project MapBuilderValidation"
+          "description": "Jar name from package created with project fhir-mapbuilder-validation"
+        },
+        "MapBuilder.port": {
+          "type": "string",
+          "default": "9031",
+          "description": "port of the fhir-mapbuilder-validation java springboot REST API"
         }
       }
     },
@@ -57,7 +62,7 @@
       {
         "id": "fml",
         "aliases": [
-          "FHIR Mapping Language - MapBuilder",
+          "FHIR Mapping Language - FHIR MapBuilder",
           "fml"
         ],
         "extensions": [
@@ -150,11 +155,12 @@
     "@vscode/test-cli": "^0.0.9",
     "@vscode/test-electron": "^2.4.0",
     "axios": "^1.3.1",
-    "esbuild": "^0.21.5",
+    "esbuild": ">=0.25.0",
     "eslint": "^8.57.0",
     "npm-run-all": "^4.1.5",
     "sinon": "^19.0.2",
     "tar": "^7.4.3",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "chokidar": "^4.0.3"
   }
 }

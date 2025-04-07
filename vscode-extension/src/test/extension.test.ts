@@ -1,20 +1,23 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import * as sinon from 'sinon';
+import * as chokidar from 'chokidar';
 import {FmlValidation} from "../FmlValidation";
 import {MapBuilderValidationApi} from "../MapBuilderValidationApi";
 import {window} from "vscode";
+import {MapBuilderWatcher} from "../MapBuilderWatcher";
+import fs from "fs";
 
 suite('Extension Test Suite', () => {
     vscode.window.showInformationMessage('Start Global tests.');
 
     test('Extension should be present', () => {
-        const extension = vscode.extensions.getExtension('aphp.map-builder');
+        const extension = vscode.extensions.getExtension('aphp.fhir-mapbuilder');
         assert.ok(extension, 'Extension is not registered in VSCode');
     });
 
     test('Extension should activate on FML file', async () => {
-        const extension = vscode.extensions.getExtension('aphp.map-builder');
+        const extension = vscode.extensions.getExtension('aphp.fhir-mapbuilder');
         if (!extension) {
             assert.fail('Extension not found');
         }
@@ -23,7 +26,7 @@ suite('Extension Test Suite', () => {
         await vscode.window.showTextDocument(document);
 
         // Wait for the extension to be activated
-        await vscode.extensions.getExtension('aphp.map-builder')?.activate();
+        await vscode.extensions.getExtension('aphp.fhir-mapbuilder')?.activate();
 
         assert.ok(extension.isActive, 'Extension did not activate when an FML file was opened');
     });
@@ -38,8 +41,10 @@ suite('Extension Commands Test Suite', () => {
     let showErrorMessageStub: sinon.SinonStub;
     let isPackagePathStub: sinon.SinonStub;
     let fmlValidationInstance: FmlValidation;
+    let mapBuilderWatcherInstance: MapBuilderWatcher;
     let mockApi: MapBuilderValidationApi;
-
+    let fmlFileWatcherOnStub: sinon.SinonStub;
+    let emitManuallyAddEventStub: sinon.SinonStub;
 
 
     setup(() => {
@@ -53,22 +58,24 @@ suite('Extension Commands Test Suite', () => {
         // Mock the API
         mockApi = sinon.createStubInstance(MapBuilderValidationApi);
 
-        // Create an instance of FmlValidation with mocked dependencies
         fmlValidationInstance = new FmlValidation(vscode.window.createOutputChannel('test'), mockApi);
-
-        // Stub the isPackagePath method to always return true
         isPackagePathStub = sinon.stub(fmlValidationInstance, 'isPackagePath').resolves(true);
 
+
+        // Stub chokidar.watch before instantiating the watcher
+        fmlFileWatcherOnStub = sinon.stub();
+        sinon.stub(chokidar, 'watch').returns({
+            on: fmlFileWatcherOnStub
+        } as any);
+
+        mapBuilderWatcherInstance = new MapBuilderWatcher(vscode.window.createOutputChannel('test'), mockApi);
+        emitManuallyAddEventStub = sinon.stub(mapBuilderWatcherInstance as any, 'emitManuallyAddEvent');
 
     });
 
     teardown(() => {
         // Restore all stubs
-        showWarningMessageStub.restore();
-        showErrorMessageStub.restore();
-        showInformationMessageStub.restore();
-        isPackagePathStub.restore();
-
+        sinon.restore();
     });
 
 
@@ -162,7 +169,76 @@ suite('Extension Commands Test Suite', () => {
         );
     });
 
+    test('should parse .fml file on add event', async () => {
+        const fakePath = 'test.fml';
+        (mockApi.callParseStructureMap as sinon.SinonStub).resolves(true);
+
+        let addHandler: ((filePath: string) => Promise<void>) | undefined;
+        fmlFileWatcherOnStub.withArgs('add').callsFake((event, cb) => {
+            addHandler = cb;
+            return undefined;
+        });
+
+        mapBuilderWatcherInstance.watchFmlFiles();
+
+        assert.ok(addHandler, 'Expected addHandler to be registered');
+        await addHandler!(fakePath);
+
+        const expectedMessage = `New file detected: ${fakePath}. The StructureMap has been parsed.`;
+        assert.ok(
+            showInformationMessageStub.calledWith(expectedMessage),
+            `Expected message "${expectedMessage}" to be shown when .fml file is added.`
+        );
+    });
+
+    test('should parse .fml file on change event', async () => {
+        const fakePath = 'test.fml';
+        (mockApi.callParseStructureMap as sinon.SinonStub).resolves(true);
+
+        let addHandler: ((filePath: string) => Promise<void>) | undefined;
+        fmlFileWatcherOnStub.withArgs('change').callsFake((event, cb) => {
+            addHandler = cb;
+            return undefined;
+        });
+
+        mapBuilderWatcherInstance.watchFmlFiles();
+
+        assert.ok(addHandler, 'Expected addHandler to be registered');
+        await addHandler!(fakePath);
+
+        const expectedMessage = `File updated: ${fakePath}. As a result, the StructureMap has been parsed.`;
+        assert.ok(
+            showInformationMessageStub.calledWith(expectedMessage),
+            `Expected message "${expectedMessage}" to be shown when .fml file is changed.`
+        );
+    });
 
 
+    test('should handle add event and show success message when engine loads', async () => {
+        const expectedMessage = `New package loading completed successfully.`;
+        (mockApi.callResetAndLoadEngine as sinon.SinonStub).resolves(expectedMessage);
 
+        sinon.stub(fs, 'existsSync').returns(true);
+
+        const fakePackagePath = `output\\package.tgz`;
+        let addHandler: ((filePath: string) => Promise<void>) | undefined;
+        fmlFileWatcherOnStub.withArgs('add').callsFake((event, cb) => {
+            addHandler = cb;
+            return undefined;
+        });
+
+
+        mapBuilderWatcherInstance.watchIgPackage();
+        assert.ok(addHandler, 'Expected addHandler to be registered');
+        await addHandler!(fakePackagePath);
+
+        assert.ok(
+            showInformationMessageStub.calledWith(expectedMessage),
+            'Expected success message to be shown'
+        );
+        assert.ok(
+            emitManuallyAddEventStub.calledOnce,
+            'Expected emitManuallyAddEvent to be called'
+        );
+    });
 });
