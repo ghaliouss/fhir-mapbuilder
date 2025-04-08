@@ -1,17 +1,17 @@
 import {spawn} from "node:child_process";
-import {ApiConstants} from "./ApiConstants";
+import {ApiConstants} from "./constants/ApiConstants";
 import {extensions, OutputChannel, window, workspace, WorkspaceConfiguration} from "vscode";
 import {logData} from "./utils";
+import {UiConstants} from "./constants/UiConstants";
 
 export class MapBuilderJavaProcess {
     mapBuilderValidationLogger: OutputChannel;
     config: WorkspaceConfiguration;
-    private extensionPublisher: string = 'aphp.fhir-mapbuilder';
 
 
     constructor(validationOutputChannel: OutputChannel) {
         this.mapBuilderValidationLogger = validationOutputChannel;
-        this.config = workspace.getConfiguration('MapBuilder');
+        this.config = workspace.getConfiguration(UiConstants.configName);
     }
 
     public start(): void {
@@ -51,12 +51,12 @@ export class MapBuilderJavaProcess {
             `-Dserver.port=${ApiConstants.apiServerPort}`, // Set server port
             `-Dfile.encoding=UTF-8`,
             "-jar",
-            `${extensions.getExtension(this.extensionPublisher)?.extensionPath}\\target\\${jarName}.jar`
+            `${extensions.getExtension(UiConstants.extensionPublisher)?.extensionPath}\\target\\${jarName}.jar`
         ];
 
         let workspaceFolders = workspace.workspaceFolders;
         if (workspaceFolders && workspaceFolders.length > 0) {
-            const packagePath = `${workspaceFolders[0].uri.fsPath}\\output\\package.tgz`;
+            const packagePath = `${workspaceFolders[0].uri.fsPath}${UiConstants.packageRelativePath}`;
             const IncludeWorkingPackage = this.config.get("IncludeWorkingPackage") ?? true;
 
             // Add IG package path if needed

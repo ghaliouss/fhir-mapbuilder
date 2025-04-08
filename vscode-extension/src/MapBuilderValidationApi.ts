@@ -1,8 +1,9 @@
 import axios from "axios";
-import {ApiConstants} from "./ApiConstants";
+import {ApiConstants} from "./constants/ApiConstants";
 import {OutputChannel, window, workspace} from "vscode";
 import os from "os";
-import {logData} from "./utils";
+import {getDataFile, logData} from "./utils";
+import {UiConstants} from "./constants/UiConstants";
 
 export class MapBuilderValidationApi {
 
@@ -92,7 +93,7 @@ export class MapBuilderValidationApi {
         let url = ApiConstants.resetAndLoadEngineUrl;
         let workspaceFolders = workspace.workspaceFolders;
         if (workspaceFolders && workspaceFolders.length > 0) {
-            const packagePath = `${workspaceFolders[0].uri.fsPath}\\output\\package.tgz`;
+            const packagePath = `${workspaceFolders[0].uri.fsPath}${UiConstants.packageRelativePath}`;
             url = `${url}?path=${encodeURIComponent(packagePath)}`;
         }
         return url;
@@ -103,17 +104,15 @@ export class MapBuilderValidationApi {
 
         const outputFolderName = "fml-generated";
 
-        const outputPath = this.getWorkspacePathOrHomeDir();
 
         const sourcePath = this.getSourceFilePath();
 
         url = `${url}?source=${encodeURIComponent(sourcePath)}`;
-
-        const config = workspace.getConfiguration('MapBuilder');
-        const dataFile: any = config?.get("dataFile");
+        const dataFile = getDataFile();
         if (dataFile) {
             url = this.appendUrlParameter(url, "data", dataFile);
         }
+        const outputPath = this.getWorkspacePathOrHomeDir();
         if (outputPath) {
             const output = `${outputPath}\\${outputFolderName}`;
             url = this.appendUrlParameter(url, "output", output);
@@ -165,7 +164,7 @@ export class MapBuilderValidationApi {
     private getPackageLoadedSuccessMessage(isLoaded: boolean): string | null {
         let workspaceFolders = workspace.workspaceFolders;
         if (isLoaded && workspaceFolders && workspaceFolders.length > 0) {
-            const packagePath = `${workspaceFolders[0].uri.fsPath}\\output\\package.tgz`;
+            const packagePath = `${workspaceFolders[0].uri.fsPath}${UiConstants.packageRelativePath}`;
             return `New package loading completed successfully. Package path: ${packagePath}`;
         }
         return null;

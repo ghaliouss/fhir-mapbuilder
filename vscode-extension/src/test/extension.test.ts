@@ -1,23 +1,24 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
+import {window} from 'vscode';
 import * as sinon from 'sinon';
 import * as chokidar from 'chokidar';
 import {FmlValidation} from "../FmlValidation";
 import {MapBuilderValidationApi} from "../MapBuilderValidationApi";
-import {window} from "vscode";
 import {MapBuilderWatcher} from "../MapBuilderWatcher";
 import fs from "fs";
+import {UiConstants} from "../constants/UiConstants";
 
 suite('Extension Test Suite', () => {
     vscode.window.showInformationMessage('Start Global tests.');
 
     test('Extension should be present', () => {
-        const extension = vscode.extensions.getExtension('aphp.fhir-mapbuilder');
+        const extension = vscode.extensions.getExtension(UiConstants.extensionPublisher);
         assert.ok(extension, 'Extension is not registered in VSCode');
     });
 
     test('Extension should activate on FML file', async () => {
-        const extension = vscode.extensions.getExtension('aphp.fhir-mapbuilder');
+        const extension = vscode.extensions.getExtension(UiConstants.extensionPublisher);
         if (!extension) {
             assert.fail('Extension not found');
         }
@@ -26,7 +27,7 @@ suite('Extension Test Suite', () => {
         await vscode.window.showTextDocument(document);
 
         // Wait for the extension to be activated
-        await vscode.extensions.getExtension('aphp.fhir-mapbuilder')?.activate();
+        await vscode.extensions.getExtension(UiConstants.extensionPublisher)?.activate();
 
         assert.ok(extension.isActive, 'Extension did not activate when an FML file was opened');
     });
@@ -45,6 +46,7 @@ suite('Extension Commands Test Suite', () => {
     let mockApi: MapBuilderValidationApi;
     let fmlFileWatcherOnStub: sinon.SinonStub;
     let emitManuallyAddEventStub: sinon.SinonStub;
+    let emitOpenFileDialogStub: sinon.SinonStub;
 
 
     setup(() => {
@@ -70,6 +72,7 @@ suite('Extension Commands Test Suite', () => {
 
         mapBuilderWatcherInstance = new MapBuilderWatcher(vscode.window.createOutputChannel('test'), mockApi);
         emitManuallyAddEventStub = sinon.stub(mapBuilderWatcherInstance as any, 'emitManuallyAddEvent');
+        emitOpenFileDialogStub = sinon.stub(fmlValidationInstance, 'openFileDialog').resolves(true);
 
     });
 
@@ -82,10 +85,10 @@ suite('Extension Commands Test Suite', () => {
     test('Commands should be registered', async () => {
         const commands = await vscode.commands.getCommands(true);
         const expectedCommands = [
-            'mapbuilder.InsertTemplate',
-            'mapbuilder.Validation',
-            'mapbuilder.ValidationWithDefaultFiles',
-            'mapbuilder.ValidationAfterLoadingPackage'
+            'fhirMapBuilder.InsertTemplate',
+            'fhirMapBuilder.Validation',
+            'fhirMapBuilder.ValidationWithDefaultFiles',
+            'fhirMapBuilder.ValidationAfterLoadingPackage'
         ];
         for (const command of expectedCommands) {
             assert.ok(commands.includes(command), `Command ${command} is not registered`);
@@ -93,7 +96,7 @@ suite('Extension Commands Test Suite', () => {
     });
 
     test('InsertTemplate Command should execute successfully', async () => {
-        const command = 'mapbuilder.InsertTemplate';
+        const command = 'fhirMapBuilder.InsertTemplate';
         try {
             await vscode.commands.executeCommand(command);
             assert.ok(true, `Command ${command} executed successfully`);
@@ -108,7 +111,7 @@ suite('Extension Commands Test Suite', () => {
         // Stub the isPackagePath method to return false (simulate invalid path)
         isPackagePathStub.resolves(false);
 
-        // Call the validateWithDefaultFiles method again
+        // Call the validateWithPossibilityToChooseFiles method again
         await fmlValidationInstance.validateWithPossibilityToChooseFiles();
 
         // Check if the error message was shown
@@ -143,6 +146,7 @@ suite('Extension Commands Test Suite', () => {
     });
 
     test('validateWithPossibilityToChooseFiles should not show an error message when package is valid', async () => {
+
         // Call the validateWithDefaultFiles method which internally calls isPackagePath
         await fmlValidationInstance.validateWithPossibilityToChooseFiles();
 

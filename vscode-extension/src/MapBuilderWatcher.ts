@@ -4,6 +4,7 @@ import * as chokidar from "chokidar";
 import {FSWatcher} from "chokidar";
 import fs from "fs";
 import {executeWithProgress} from "./utils";
+import {UiConstants} from "./constants/UiConstants";
 
 
 export class MapBuilderWatcher {
@@ -15,14 +16,14 @@ export class MapBuilderWatcher {
 
     constructor(outputChannel: OutputChannel, mapBuilderValidationApi: MapBuilderValidationApi) {
         this.logger = outputChannel;
-        this.config = workspace.getConfiguration('MapBuilder');
+        this.config = workspace.getConfiguration(UiConstants.configName);
         this.api = mapBuilderValidationApi;
         this.fmlFileWatcher = this.createFmlFileWatcher();
     }
 
 
     public watchIgPackage() {
-        const packagePath = `${this.getRootPath()}\\output\\package.tgz`;
+        const packagePath = `${this.getRootPath()}${UiConstants.packageRelativePath}`;
 
         if (!fs.existsSync(packagePath)) {
             vscode.window.showErrorMessage(`Folder does not exist: ${packagePath}`);
