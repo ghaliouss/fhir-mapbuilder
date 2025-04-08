@@ -53,7 +53,7 @@
         },
         "FhirMapBuilder.port": {
           "type": "number",
-          "default": "9031",
+          "default": 9031,
           "description": "Port of the fhir-mapbuilder-validation java springboot REST API"
         }
       }
