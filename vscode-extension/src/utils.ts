@@ -1,4 +1,4 @@
-import {CompletionItem, OutputChannel, ProgressLocation, window} from 'vscode';
+import {CompletionItem, OutputChannel, ProgressLocation, window, workspace} from 'vscode';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -7,6 +7,7 @@ import * as zlib from 'zlib';
 import * as tar from 'tar';
 import {FhirDefinition} from './FhirDefinition';
 import {ElementInfo} from './Models';
+import {UiConstants} from "./constants/UiConstants";
 
 
 export function downloadFHIRPackage(logger : OutputChannel, registries : string[], packageName : string, version : string) : boolean {
@@ -239,4 +240,11 @@ export async function executeWithProgress(message: string, task: () => Promise<v
         await task();
       }
   );
+}
+export function isEmptyOrBlank(str: string): boolean {
+  return !str || str.trim() === '';
+}
+export function  getDataFile(): string {
+  const config = workspace.getConfiguration(UiConstants.configName);
+  return <string>config?.get("dataFile");
 }

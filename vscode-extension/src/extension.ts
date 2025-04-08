@@ -6,6 +6,7 @@ import {FmlValidation} from './FmlValidation';
 import {MapBuilderJavaProcess} from "./MapBuilderJavaProcess";
 import {MapBuilderValidationApi} from "./MapBuilderValidationApi";
 import {MapBuilderWatcher} from "./MapBuilderWatcher";
+import {UiConstants} from "./constants/UiConstants";
 
 const FML_MODE = {language: 'fml', scheme: 'file'};
 
@@ -14,8 +15,8 @@ export function activate(context: vscode.ExtensionContext): {
 } {
 
     try {
-        const principalChannel = vscode.window.createOutputChannel("MapBuilder");
-        const detailsChannel = vscode.window.createOutputChannel("MapBuilderValidation");
+        const principalChannel = UiConstants.principalChannel;
+        const detailsChannel = UiConstants.detailsChannel;
 
         const api = getMapBuilderValidationApi(detailsChannel);
 
@@ -39,8 +40,7 @@ export function activate(context: vscode.ExtensionContext): {
 }
 
 export function deactivate() {
-    const validationOutputChannel = vscode.window.createOutputChannel("MapBuilderValidation");
-    const api = new MapBuilderValidationApi(validationOutputChannel);
+    const api = new MapBuilderValidationApi(UiConstants.detailsChannel);
     api.callShutDownProcess();
 
 }
@@ -75,7 +75,7 @@ function addAutoComplete(outputChannel: OutputChannel, context: vscode.Extension
 }
 
 function addFMLTemplate(context: vscode.ExtensionContext) {
-    context.subscriptions.push(vscode.commands.registerCommand('mapbuilder.InsertTemplate', () => {
+    context.subscriptions.push(vscode.commands.registerCommand('fhirMapBuilder.InsertTemplate', () => {
         if (vscode.window.activeTextEditor) {
             vscode.languages.setTextDocumentLanguage(vscode.window.activeTextEditor.document, FML_MODE.language as string);
             vscode.commands.executeCommand("editor.action.insertSnippet", {"name": "Template"});
@@ -84,7 +84,7 @@ function addFMLTemplate(context: vscode.ExtensionContext) {
 }
 
 function addValidationCommand(outputChannel: OutputChannel, validationOutputChannel: OutputChannel, mapBuilderValidationApi: MapBuilderValidationApi, context: vscode.ExtensionContext) {
-    context.subscriptions.push(vscode.commands.registerCommand('mapbuilder.Validation', async () => {
+    context.subscriptions.push(vscode.commands.registerCommand('fhirMapBuilder.Validation', async () => {
 
         const fmlValidation = new FmlValidation(outputChannel, mapBuilderValidationApi);
         await fmlValidation.validateWithPossibilityToChooseFiles();
@@ -92,7 +92,7 @@ function addValidationCommand(outputChannel: OutputChannel, validationOutputChan
 }
 
 function addValidationWithDefaultFilesCommand(outputChannel: OutputChannel, validationOutputChannel: OutputChannel, mapBuilderValidationApi: MapBuilderValidationApi, context: vscode.ExtensionContext) {
-    context.subscriptions.push(vscode.commands.registerCommand('mapbuilder.ValidationWithDefaultFiles', async () => {
+    context.subscriptions.push(vscode.commands.registerCommand('fhirMapBuilder.ValidationWithDefaultFiles', async () => {
 
         const fmlValidation = new FmlValidation(outputChannel, mapBuilderValidationApi);
         await fmlValidation.validateWithDefaultFiles();
@@ -108,7 +108,7 @@ function addValidationAfterLoadingPackageCommand(
 ) {
     context.subscriptions.push(
         vscode.commands.registerCommand(
-            'mapbuilder.ValidationAfterLoadingPackage',
+            'fhirMapBuilder.ValidationAfterLoadingPackage',
             async () => {
                 const fmlValidation = new FmlValidation(outputChannel, mapBuilderValidationApi);
                 const isPackagePath = await fmlValidation.checkPackagePath();

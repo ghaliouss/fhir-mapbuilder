@@ -9,7 +9,8 @@ import vscode, {
 } from "vscode";
 import fs from 'fs';
 import {MapBuilderValidationApi} from "./MapBuilderValidationApi";
-import {executeWithProgress, logData} from "./utils";
+import {executeWithProgress, getDataFile, isEmptyOrBlank, logData} from "./utils";
+import {UiConstants} from "./constants/UiConstants";
 
 
 export class FmlValidation {
@@ -21,7 +22,7 @@ export class FmlValidation {
 
     constructor(outputChannel: OutputChannel, mapBuilderValidationApi: MapBuilderValidationApi) {
         this.logger = outputChannel;
-        this.config = workspace.getConfiguration('MapBuilder');
+        this.config = workspace.getConfiguration(UiConstants.configName);
         this.api = mapBuilderValidationApi;
     }
 
@@ -38,14 +39,14 @@ export class FmlValidation {
 
 
     public async validateWithDefaultFiles(): Promise<void> {
-        this.initTerminalAndConfig();
         logData('Start validation', this.logger);
+        this.initConfig();
         await this.performValidation();
     }
 
     public async validateWithPossibilityToChooseFiles(): Promise<void> {
-        this.initTerminalAndConfig();
         logData('Start validation', this.logger);
+        this.initConfig();
         await this.checkPackagePathWarningMessage();
         let {editor, keepGoing} = await this.chooseFilesAndContinue();
         if (editor && keepGoing) {
@@ -84,9 +85,9 @@ export class FmlValidation {
         await executeWithProgress("Validation in progress...", async () => {
             const result = await this.api.callValidateStructureMap();
             logData('End validation', this.logger);
-            if(result){
+            if (result) {
                 window.showInformationMessage('Validation completed successfully.');
-            }else{
+            } else {
                 window.showErrorMessage('Validation error occurred.');
             }
         });
@@ -97,28 +98,21 @@ export class FmlValidation {
         let workspaceFolders = workspace.workspaceFolders;
         let packagePath = "";
         if (workspaceFolders && workspaceFolders.length > 0) {
-            packagePath = `${workspaceFolders[0].uri.fsPath}\\output\\package.tgz`;
+            packagePath = `${workspaceFolders[0].uri.fsPath}${UiConstants.packageRelativePath}`;
         }
         return packagePath;
     }
 
     private async chooseFilesAndContinue() {
         let editor = window.activeTextEditor;
-        let keepGoing: boolean = false;
-        if (this.config.get("dataFile") !== "") {
-            keepGoing = await this.openFileDialog();
-        }
+        const keepGoing = await this.openFileDialog();
+
         return {editor, keepGoing};
     }
 
-    private initTerminalAndConfig() {
-        const openTerminal = window.terminals.find(terminal => terminal.name === "Validate FML");
-        if (openTerminal !== undefined) {
-            openTerminal.dispose();
-        }
-        this.terminal = window.createTerminal('Validate FML');
+    private initConfig() {
         logData('Start retrieve configuration', this.logger);
-        this.config = workspace.getConfiguration('MapBuilder');
+        this.config = workspace.getConfiguration(UiConstants.configName);
         logData('End retrieve configuration', this.logger);
 
     }
@@ -136,7 +130,7 @@ export class FmlValidation {
         if (fileUri && fileUri[0]) {
             let filePath = fileUri[0].fsPath;
             await this.config.update("dataFile", filePath, ConfigurationTarget.Global);
-            this.config = workspace.getConfiguration('MapBuilder');
+            this.config = workspace.getConfiguration(UiConstants.configName);
             return true;
         }
 

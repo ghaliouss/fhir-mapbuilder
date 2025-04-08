@@ -34,27 +34,27 @@
   "main": "./dist/extension.js",
   "contributes": {
     "configuration": {
-      "title": "MapBuilder",
+      "title": "FhirMapBuilder",
       "properties": {
-        "MapBuilder.IncludeWorkingPackage": {
+        "FhirMapBuilder.IncludeWorkingPackage": {
           "type": "boolean",
           "default": true,
-          "description": "Whether or not to include the work package to add it to the engine inside fhir-mapbuilder-validation"
+          "description": "Decide whether to include the work package by integrating it into the matchbox engine within fhir-mapbuilder-validation"
         },
-        "MapBuilder.dataFile": {
+        "FhirMapBuilder.dataFile": {
           "type": "string",
           "default": "",
-          "description": "A json file containing a set of data for transformation with FML"
+          "description": "Current input json file that serves as source to test map"
         },
-        "MapBuilder.jarName": {
+        "FhirMapBuilder.jarName": {
           "type": "string",
           "default": "fhir-mapbuilder-validation",
-          "description": "Jar name from package created with project fhir-mapbuilder-validation"
+          "description": "Jar name of the REST API that provides backend validation"
         },
-        "MapBuilder.port": {
-          "type": "string",
+        "FhirMapBuilder.port": {
+          "type": "number",
           "default": "9031",
-          "description": "port of the fhir-mapbuilder-validation java springboot REST API"
+          "description": "Port of the fhir-mapbuilder-validation java springboot REST API"
         }
       }
     },
@@ -86,21 +86,21 @@
     ],
     "commands": [
       {
-        "command": "mapbuilder.ValidationAfterLoadingPackage",
+        "command": "fhirMapBuilder.ValidationAfterLoadingPackage",
         "title": "Load new package and Validate StructureMap",
         "category": "Files"
       },
       {
-        "command": "mapbuilder.ValidationWithDefaultFiles",
+        "command": "fhirMapBuilder.ValidationWithDefaultFiles",
         "title": "Validate StructureMap (Current input)",
         "category": "Files"
       },
       {
-        "command": "mapbuilder.Validation",
+        "command": "fhirMapBuilder.Validation",
         "title": "Validate StructureMap (With input selection)"
       },
       {
-        "command": "mapbuilder.InsertTemplate",
+        "command": "fhirMapBuilder.InsertTemplate",
         "title": "Insert template FML",
         "category": "Files"
       }
@@ -108,22 +108,22 @@
     "menus": {
       "editor/context": [
         {
-          "command": "mapbuilder.ValidationWithDefaultFiles",
+          "command": "fhirMapBuilder.ValidationWithDefaultFiles",
           "group": "navigation@1",
           "when": "editorLangId == fml"
         },
         {
-          "command": "mapbuilder.Validation",
+          "command": "fhirMapBuilder.Validation",
           "group": "navigation@2",
           "when": "editorLangId == fml"
         },
         {
-          "command": "mapbuilder.ValidationAfterLoadingPackage",
+          "command": "fhirMapBuilder.ValidationAfterLoadingPackage",
           "group": "navigation@3",
           "when": "editorLangId == fml"
         },
         {
-          "command": "mapbuilder.InsertTemplate",
+          "command": "fhirMapBuilder.InsertTemplate",
           "group": "navigation@4"
         }
       ]
