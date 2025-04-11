@@ -63,6 +63,12 @@ export class MapBuilderValidationApi {
     // Call the matchbox validation to reset and load engine
     public async callResetAndLoadEngine(): Promise<string | null> {
         try {
+            const isRunning = await this.isAppRunning();
+            if (!isRunning) {
+                // Wait for the Java process to initialize
+                logData(`Waiting for the java application to start...`, this.mapBuilderValidationLogger);
+                await this.waitForJavaAppReady();
+            }
             const url = this.buildResetAndLoadEngineUrl();
             logData(`Invoking matchbox reset and load engine: URL= ${url}`, this.mapBuilderValidationLogger);
             const response = await axios.get(url);

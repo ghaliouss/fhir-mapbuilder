@@ -18,7 +18,7 @@ import {
   UserDefinition
 } from './Models';
 import { 
-  collectFilesFromPath,
+  collectFilesWithExtension,
   retrieveAllLines,
   retrieveLines,
   retrieveSourceAndTargetFromGroupLine,
@@ -64,7 +64,7 @@ export class FmlCompletionProvider implements CompletionItemProvider {
     workspace.workspaceFolders!.forEach(folder => {
       const folderPath = folder.uri.fsPath;
       this.logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : Start collectFilesFromPath for ${folderPath}`);
-      collectFilesFromPath(folderPath, fmlFiles, '.fml');
+      collectFilesWithExtension(folderPath, fmlFiles, '.fml');
       this.logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : End collectFilesFromPath for ${folderPath}`);
     });
 
@@ -171,7 +171,7 @@ export class FmlCompletionProvider implements CompletionItemProvider {
     // get fml files from path
     const fmlFiles: string[] = [];
     this.logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : Start collectFilesFromPath for ${filepath}`);
-    collectFilesFromPath(filepath, fmlFiles, '.fml');
+    collectFilesWithExtension(filepath, fmlFiles, '.fml');
     this.logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : Start collectFilesFromPath for ${filepath}`);
 
     fmlFiles.forEach(fmlFile => {

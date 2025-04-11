@@ -10,26 +10,26 @@ import {ElementInfo} from './Models';
 import {UiConstants} from "./constants/UiConstants";
 
 
-export function downloadFHIRPackage(logger : OutputChannel, registries : string[], packageName : string, version : string) : boolean {
+export function downloadFHIRPackage(logger: OutputChannel, registries: string[], packageName: string, version: string): boolean {
   logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : Start downloadFHIRPackage for ${packageName}#${version}`);
   let download = false;
 
   registries.forEach(url => {
     try {
-      if(!download) {
-        axios.get(`${url}/${packageName}/${version}`, { responseType: 'arraybuffer' }).then(
-          result => {
-            if (result.status === 200) {
-              const filePath = path.join(os.homedir(), '.fhir', `${packageName}-${version}.tgz`);
-              fs.writeFileSync(filePath, result.data);
-              console.log(`Package downloaded successfully: ${filePath}`);
-              logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : End downloadFHIRPackage`);
-              download = true;
-            }
-          },
-          error => {
-            logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : Error downloading package ${packageName}#${version} from ${url}`);
-          });
+      if (!download) {
+        axios.get(`${url}/${packageName}/${version}`, {responseType: 'arraybuffer'}).then(
+            result => {
+              if (result.status === 200) {
+                const filePath = path.join(os.homedir(), '.fhir', `${packageName}-${version}.tgz`);
+                fs.writeFileSync(filePath, result.data);
+                console.log(`Package downloaded successfully: ${filePath}`);
+                logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : End downloadFHIRPackage`);
+                download = true;
+              }
+            },
+            error => {
+              logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : Error downloading package ${packageName}#${version} from ${url}`);
+            });
       }
     } catch (er) {
       logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : Error downloading package ${packageName}#${version} : ${er}`);
@@ -39,19 +39,19 @@ export function downloadFHIRPackage(logger : OutputChannel, registries : string[
   return download;
 }
 
-export async function extractTGZ(logger : OutputChannel, filePath: string, outputDir: string) : Promise<void> {
+export async function extractTGZ(logger: OutputChannel, filePath: string, outputDir: string): Promise<void> {
   logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : Start extractTGZ for ${filePath}`);
   return new Promise((resolve, reject) => {
-      // Ensure the output directory exists
-      fs.mkdirSync(outputDir, { recursive: true });
-  
-      // Create a read stream for the .tgz file
-      const fileStream = fs.createReadStream(filePath);
-  
-      // Pipe the stream through zlib to decompress and tar to extract
-      fileStream
+    // Ensure the output directory exists
+    fs.mkdirSync(outputDir, {recursive: true});
+
+    // Create a read stream for the .tgz file
+    const fileStream = fs.createReadStream(filePath);
+
+    // Pipe the stream through zlib to decompress and tar to extract
+    fileStream
         .pipe(zlib.createGunzip())
-        .pipe(tar.extract({ cwd: outputDir }))
+        .pipe(tar.extract({cwd: outputDir}))
         .on('finish', () => {
           console.log('Extraction complete');
           logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : Extraction complete`);
@@ -67,24 +67,30 @@ export async function extractTGZ(logger : OutputChannel, filePath: string, outpu
   });
 }
 
-export function collectFilesFromPath(filepath: string, files: string[], extension : string): void {
+export function collectFilesWithExtension(filepath: string,
+                                          files: string[],
+                                          extension: string): void {
+
   const stats = fs.statSync(filepath);
+
   if (stats.isDirectory()) {
-    fs.readdirSync(filepath).forEach(file => {
-      collectFilesFromPath(path.join(filepath, file), files, extension);
-    });
+    const entries = fs.readdirSync(filepath);
+    for (const entry of entries) {
+      const fullPath = path.join(filepath, entry);
+      collectFilesWithExtension(fullPath, files, extension);
+    }
   } else if (filepath.endsWith(extension)) {
     files.push(filepath);
   }
 }
 
-export function retrieveAllLines(logger : OutputChannel, fmlFile : string) : string[]{
+export function retrieveAllLines(logger: OutputChannel, fmlFile: string): string[] {
   logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : Start eretrieveAllLines`);
 
   try {
     // Lire tout le contenu du fichier de manière synchrone
     const fileContent: string = fs.readFileSync(fmlFile, 'utf-8');
-    
+
     // Diviser le contenu en lignes
     const lines: string[] = fileContent.split(/\r?\n/);
     logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : End retrieveAllLines`);
@@ -97,11 +103,11 @@ export function retrieveAllLines(logger : OutputChannel, fmlFile : string) : str
   }
 }
 
-export function retrieveLines(logger : OutputChannel, lines : string[], startString : string) : string[] {
+export function retrieveLines(logger: OutputChannel, lines: string[], startString: string): string[] {
   logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : Start retrieveLines`);
-  let returnLines : string[] = [];
+  let returnLines: string[] = [];
   lines.forEach((line) => {
-    if(line.startsWith(startString)){
+    if (line.startsWith(startString)) {
       returnLines.push(line);
     }
   });
@@ -109,14 +115,14 @@ export function retrieveLines(logger : OutputChannel, lines : string[], startStr
   return returnLines;
 }
 
-export function retrieveSourceAndTargetFromGroupLine(logger : OutputChannel, groupLine : string) : string[] {
+export function retrieveSourceAndTargetFromGroupLine(logger: OutputChannel, groupLine: string): string[] {
   logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : Start retrieveSourceAndTargetFromGroupLine`);
   const regex = /\((.*?)\)/;
   const match = groupLine.match(regex);
   let parenthesisString = '';
   let splitParenthesisString: any[];
-  let returnLines : string[] = [];
-  
+  let returnLines: string[] = [];
+
   if (match && match[1]) {
     parenthesisString = match[1];
   }
@@ -131,15 +137,14 @@ export function retrieveSourceAndTargetFromGroupLine(logger : OutputChannel, gro
   return returnLines;
 }
 
-export function retrieveNameAndAlias(logger : OutputChannel, line : string) : [string, string, string] {
+export function retrieveNameAndAlias(logger: OutputChannel, line: string): [string, string, string] {
   logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : Start retrieveNameAndAlias`);
   let splitSrcLine: any[];
   let element: string;
-  if(line.startsWith('source')){
+  if (line.startsWith('source')) {
     element = 'source';
     splitSrcLine = (line.replace('source ', '')).split(":");
-  }
-  else {
+  } else {
     element = 'target';
     splitSrcLine = (line.replace('target ', '')).split(":");
   }
@@ -147,7 +152,7 @@ export function retrieveNameAndAlias(logger : OutputChannel, line : string) : [s
   return [splitSrcLine[0].replace(/\s/g, ""), splitSrcLine[1].replace(/\s/g, ""), element];
 }
 
-export function retrieveUrlAliasAs(logger : OutputChannel, line : string) : [string, string, string] {
+export function retrieveUrlAliasAs(logger: OutputChannel, line: string): [string, string, string] {
   logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : Start retrieveUrlAliasAs`);
 
   let splitLine = [];
@@ -158,15 +163,15 @@ export function retrieveUrlAliasAs(logger : OutputChannel, line : string) : [str
   splitLine = line.split(' ');
 
   splitLine.forEach((element, index) => {
-    switch(element.toLowerCase()) {
+    switch (element.toLowerCase()) {
       case 'uses':
-        url = splitLine[index+1].slice(1, -1);
+        url = splitLine[index + 1].slice(1, -1);
         break;
       case 'alias':
-        alias = splitLine[index+1];
+        alias = splitLine[index + 1];
         break;
       case 'as':
-        as = splitLine[index+1];
+        as = splitLine[index + 1];
         break;
     }
   });
@@ -175,38 +180,38 @@ export function retrieveUrlAliasAs(logger : OutputChannel, line : string) : [str
   return [url, alias, as];
 }
 
-export function retrieveType(logger : OutputChannel, url: string) : string {
+export function retrieveType(logger: OutputChannel, url: string): string {
   logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : Start retrieveType`);
 
   let splitUrl: any[];
   let type: string;
 
   splitUrl = url.split('/');
-  type = splitUrl[splitUrl.length-1];
+  type = splitUrl[splitUrl.length - 1];
   logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : End retrieveType`);
 
   return type;
 }
 
-export async function getAllParamsFromUrl(logger : OutputChannel, url : string, definitionProvider : FhirDefinition) : Promise<CompletionItem[]>{
+export async function getAllParamsFromUrl(logger: OutputChannel, url: string, definitionProvider: FhirDefinition): Promise<CompletionItem[]> {
   logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : Start getAllParamsFromUrl`);
 
-  let completionItemList : CompletionItem[] = [];
-  
-  if(url === '') {
+  let completionItemList: CompletionItem[] = [];
+
+  if (url === '') {
     logger.appendLine(`${(new Date()).toLocaleString('fr-FR')} : Error url empty`);
     return [];
   }
 
-  if(definitionProvider.fhirEntities && definitionProvider.fhirEntities.has(url)) {
+  if (definitionProvider.fhirEntities && definitionProvider.fhirEntities.has(url)) {
     definitionProvider.fhirEntities.forEach((value, key) => {
-      if(key === url) {
-        value.elements?.forEach((elem : ElementInfo) => {
-            completionItemList.push(new CompletionItem(elem.path));
+      if (key === url) {
+        value.elements?.forEach((elem: ElementInfo) => {
+          completionItemList.push(new CompletionItem(elem.path));
         });
       }
     });
-  } else if(url.includes(definitionProvider.canonicalURL) && !definitionProvider.fhirEntities.has(url)) {
+  } else if (url.includes(definitionProvider.canonicalURL) && !definitionProvider.fhirEntities.has(url)) {
     //registre local ou id#dev => déjà traité lors du chargement des définitions FHIR => reste qu'à afficher le message demandant de build la solution
     completionItemList.push(new CompletionItem("You need to build IG to access autocomplete"));
   }
@@ -241,10 +246,12 @@ export async function executeWithProgress(message: string, task: () => Promise<v
       }
   );
 }
+
 export function isEmptyOrBlank(str: string): boolean {
   return !str || str.trim() === '';
 }
-export function  getDataFile(): string {
+
+export function getDataFile(): string {
   const config = workspace.getConfiguration(UiConstants.configName);
   return <string>config?.get("dataFile");
 }
