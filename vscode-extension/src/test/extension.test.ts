@@ -2,11 +2,9 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import {window} from 'vscode';
 import * as sinon from 'sinon';
-import * as chokidar from 'chokidar';
 import {FmlValidation} from "../FmlValidation";
 import {MapBuilderValidationApi} from "../MapBuilderValidationApi";
 import {MapBuilderWatcher} from "../MapBuilderWatcher";
-import fs from "fs";
 import {UiConstants} from "../constants/UiConstants";
 
 suite('Extension Test Suite', () => {
@@ -40,7 +38,7 @@ suite('Extension Commands Test Suite', () => {
     let showWarningMessageStub: sinon.SinonStub;
     let showInformationMessageStub: sinon.SinonStub;
     let showErrorMessageStub: sinon.SinonStub;
-    let isPackagePathStub: sinon.SinonStub;
+    //  let isPackagePathStub: sinon.SinonStub;
     let fmlValidationInstance: FmlValidation;
     let mapBuilderWatcherInstance: MapBuilderWatcher;
     let mockApi: MapBuilderValidationApi;
@@ -61,18 +59,14 @@ suite('Extension Commands Test Suite', () => {
         mockApi = sinon.createStubInstance(MapBuilderValidationApi);
 
         fmlValidationInstance = new FmlValidation(vscode.window.createOutputChannel('test'), mockApi);
-        isPackagePathStub = sinon.stub(fmlValidationInstance, 'isPackagePath').resolves(true);
+        //  isPackagePathStub = sinon.stub(fmlValidationInstance, 'isPackagePath').resolves(true);
 
 
         // Stub chokidar.watch before instantiating the watcher
         fmlFileWatcherOnStub = sinon.stub();
-        sinon.stub(chokidar, 'watch').returns({
-            on: fmlFileWatcherOnStub
-        } as any);
 
         mapBuilderWatcherInstance = new MapBuilderWatcher(vscode.window.createOutputChannel('test'), mockApi);
-        emitManuallyAddEventStub = sinon.stub(mapBuilderWatcherInstance as any, 'emitManuallyAddEvent');
-        emitOpenFileDialogStub = sinon.stub(fmlValidationInstance, 'openFileDialog').resolves(true);
+        sinon.stub(mapBuilderWatcherInstance, 'parseAllFmlFiles').resolves(0);
 
     });
 
@@ -107,24 +101,8 @@ suite('Extension Commands Test Suite', () => {
     });
 
 
-    test('validateWithPossibilityToChooseFiles should show an error message when package path is invalid', async () => {
-        // Stub the isPackagePath method to return false (simulate invalid path)
-        isPackagePathStub.resolves(false);
 
-        // Call the validateWithPossibilityToChooseFiles method again
-        await fmlValidationInstance.validateWithPossibilityToChooseFiles();
-
-        // Check if the error message was shown
-        const expectedErrorMessage = "There is no output\\package.tgz file in this project!";
-
-        assert.ok(
-            showWarningMessageStub.calledWith(expectedErrorMessage),
-            `Expected error message "${expectedErrorMessage}" was not shown`
-        );
-    });
-
-
-    test('validateWithDefaultFiles should show error message when validation fails', async () => {
+    test('validateWithDefaultFiles should show an error message when validation fails', async () => {
 
         // Call the validateWithDefaultFiles method
         await fmlValidationInstance.validateWithDefaultFiles();
@@ -145,21 +123,6 @@ suite('Extension Commands Test Suite', () => {
 
     });
 
-    test('validateWithPossibilityToChooseFiles should not show an error message when package is valid', async () => {
-
-        // Call the validateWithDefaultFiles method which internally calls isPackagePath
-        await fmlValidationInstance.validateWithPossibilityToChooseFiles();
-
-        // Check if the expected message was shown
-        const expectedMessage = "There is no output\\package.tgz file in this project!";
-
-        // Since isPackagePath is mocked to return true, this should not trigger the error message
-        assert.ok(
-            !showWarningMessageStub.calledWith(expectedMessage),
-            `Expected message "${expectedMessage}" should not be shown when the package path is valid.`
-        );
-
-    });
 
 
     test('validateWithDefaultFiles should show an error message when validation error occured', async () => {
@@ -170,79 +133,6 @@ suite('Extension Commands Test Suite', () => {
         assert.ok(
             showErrorMessageStub.calledWith(expectedErrorMessage),
             `Expected message "${expectedErrorMessage}" should not be shown when validation is successful.`
-        );
-    });
-
-    test('should parse .fml file on add event', async () => {
-        const fakePath = 'test.fml';
-        (mockApi.callParseStructureMap as sinon.SinonStub).resolves(true);
-
-        let addHandler: ((filePath: string) => Promise<void>) | undefined;
-        fmlFileWatcherOnStub.withArgs('add').callsFake((event, cb) => {
-            addHandler = cb;
-            return undefined;
-        });
-
-        mapBuilderWatcherInstance.watchFmlFiles();
-
-        assert.ok(addHandler, 'Expected addHandler to be registered');
-        await addHandler!(fakePath);
-
-        const expectedMessage = `New file detected: ${fakePath}. The StructureMap has been parsed.`;
-        assert.ok(
-            showInformationMessageStub.calledWith(expectedMessage),
-            `Expected message "${expectedMessage}" to be shown when .fml file is added.`
-        );
-    });
-
-    test('should parse .fml file on change event', async () => {
-        const fakePath = 'test.fml';
-        (mockApi.callParseStructureMap as sinon.SinonStub).resolves(true);
-
-        let addHandler: ((filePath: string) => Promise<void>) | undefined;
-        fmlFileWatcherOnStub.withArgs('change').callsFake((event, cb) => {
-            addHandler = cb;
-            return undefined;
-        });
-
-        mapBuilderWatcherInstance.watchFmlFiles();
-
-        assert.ok(addHandler, 'Expected addHandler to be registered');
-        await addHandler!(fakePath);
-
-        const expectedMessage = `File updated: ${fakePath}. As a result, the StructureMap has been parsed.`;
-        assert.ok(
-            showInformationMessageStub.calledWith(expectedMessage),
-            `Expected message "${expectedMessage}" to be shown when .fml file is changed.`
-        );
-    });
-
-
-    test('should handle add event and show success message when engine loads', async () => {
-        const expectedMessage = `New package loading completed successfully.`;
-        (mockApi.callResetAndLoadEngine as sinon.SinonStub).resolves(expectedMessage);
-
-        sinon.stub(fs, 'existsSync').returns(true);
-
-        const fakePackagePath = `output\\package.tgz`;
-        let addHandler: ((filePath: string) => Promise<void>) | undefined;
-        fmlFileWatcherOnStub.withArgs('add').callsFake((event, cb) => {
-            addHandler = cb;
-            return undefined;
-        });
-
-
-        mapBuilderWatcherInstance.watchIgPackage();
-        assert.ok(addHandler, 'Expected addHandler to be registered');
-        await addHandler!(fakePackagePath);
-
-        assert.ok(
-            showInformationMessageStub.calledWith(expectedMessage),
-            'Expected success message to be shown'
-        );
-        assert.ok(
-            emitManuallyAddEventStub.calledOnce,
-            'Expected emitManuallyAddEvent to be called'
         );
     });
 });

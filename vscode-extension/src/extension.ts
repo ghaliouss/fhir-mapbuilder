@@ -9,6 +9,7 @@ import {MapBuilderWatcher} from "./MapBuilderWatcher";
 import {UiConstants} from "./constants/UiConstants";
 
 const FML_MODE = {language: 'fml', scheme: 'file'};
+let watcher: MapBuilderWatcher;
 
 export function activate(context: vscode.ExtensionContext): {
     completionProviderInstance: FmlCompletionProvider | null
@@ -30,7 +31,7 @@ export function activate(context: vscode.ExtensionContext): {
 
         addValidationAfterLoadingPackageCommand(principalChannel, detailsChannel, api, context);
 
-        addWatcher(principalChannel, api);
+        addWatcher(detailsChannel, api);
 
         return {completionProviderInstance};
 
@@ -40,9 +41,9 @@ export function activate(context: vscode.ExtensionContext): {
 }
 
 export function deactivate() {
+    watcher?.dispose();
     const api = new MapBuilderValidationApi(UiConstants.detailsChannel);
     api.callShutDownProcess();
-
 }
 
 function getMapBuilderValidationApi(validationOutputChannel: OutputChannel) {
@@ -58,9 +59,7 @@ function getMapBuilderValidationApi(validationOutputChannel: OutputChannel) {
 }
 
 function addWatcher(principalChannel: OutputChannel, api: MapBuilderValidationApi) {
-    const watcher = new MapBuilderWatcher(principalChannel, api);
-    watcher.watchFmlFiles();
-    watcher.watchIgPackage();
+    watcher = new MapBuilderWatcher(principalChannel, api);
 }
 
 function addAutoComplete(outputChannel: OutputChannel, context: vscode.ExtensionContext): [FhirDefinition, FmlCompletionProvider] {
@@ -112,7 +111,7 @@ function addValidationAfterLoadingPackageCommand(
             async () => {
                 const fmlValidation = new FmlValidation(outputChannel, mapBuilderValidationApi);
                 const isPackagePath = await fmlValidation.checkPackagePath();
-                if(isPackagePath){
+                if (isPackagePath) {
                     await fmlValidation.loadPackage();
                     await fmlValidation.validateWithPossibilityToChooseFiles();
                 }

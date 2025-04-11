@@ -32,7 +32,7 @@ export class FmlValidation {
             const message = await this.api.callResetAndLoadEngine();
             message
                 ? vscode.window.showInformationMessage(message)
-                : vscode.window.showErrorMessage('Cannot load package');
+                : vscode.window.showErrorMessage('Failed to load package.');
         });
 
     }
