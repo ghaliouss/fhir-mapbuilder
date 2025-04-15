@@ -2,10 +2,12 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 import {window} from 'vscode';
 import * as sinon from 'sinon';
+import {SinonStub} from 'sinon';
 import {FmlValidation} from "../FmlValidation";
 import {MapBuilderValidationApi} from "../MapBuilderValidationApi";
 import {MapBuilderWatcher} from "../MapBuilderWatcher";
 import {UiConstants} from "../constants/UiConstants";
+import path from "path";
 
 suite('Extension Test Suite', () => {
     vscode.window.showInformationMessage('Start Global tests.');
@@ -43,30 +45,25 @@ suite('Extension Commands Test Suite', () => {
     let mapBuilderWatcherInstance: MapBuilderWatcher;
     let mockApi: MapBuilderValidationApi;
     let fmlFileWatcherOnStub: sinon.SinonStub;
-    let emitManuallyAddEventStub: sinon.SinonStub;
-    let emitOpenFileDialogStub: sinon.SinonStub;
+    let openFileDialog: sinon.SinonStub;
 
 
     setup(() => {
-        // Stub the warning message dialog
         showWarningMessageStub = sinon.stub(vscode.window, 'showWarningMessage').resolves(undefined);
-        // Stub the error message dialog
         showErrorMessageStub = sinon.stub(vscode.window, 'showErrorMessage').resolves(undefined);
-        // Stub the information message dialog
         showInformationMessageStub = sinon.stub(window, 'showInformationMessage');
 
         // Mock the API
         mockApi = sinon.createStubInstance(MapBuilderValidationApi);
 
         fmlValidationInstance = new FmlValidation(vscode.window.createOutputChannel('test'), mockApi);
-        //  isPackagePathStub = sinon.stub(fmlValidationInstance, 'isPackagePath').resolves(true);
 
 
-        // Stub chokidar.watch before instantiating the watcher
         fmlFileWatcherOnStub = sinon.stub();
 
         mapBuilderWatcherInstance = new MapBuilderWatcher(vscode.window.createOutputChannel('test'), mockApi);
-        sinon.stub(mapBuilderWatcherInstance, 'parseAllFmlFiles').resolves(0);
+
+        openFileDialog = sinon.stub(fmlValidationInstance, 'openFileDialog').resolves(true);
 
     });
 
@@ -101,7 +98,6 @@ suite('Extension Commands Test Suite', () => {
     });
 
 
-
     test('validateWithDefaultFiles should show an error message when validation fails', async () => {
 
         // Call the validateWithDefaultFiles method
@@ -134,5 +130,88 @@ suite('Extension Commands Test Suite', () => {
             showErrorMessageStub.calledWith(expectedErrorMessage),
             `Expected message "${expectedErrorMessage}" should not be shown when validation is successful.`
         );
+    });
+    test('validateWithDefaultFiles should show a success message when validation is successful', async () => {
+
+        (mockApi.callValidateStructureMap as SinonStub).resolves(true);
+
+
+        await fmlValidationInstance.validateWithDefaultFiles();
+
+        assert.ok(
+            showInformationMessageStub.calledWith('Validation completed successfully.'),
+            'Expected validation succeed message to be shown'
+        );
+    });
+
+
+    test('validateWithPossibilityToChooseFiles should show an error message when validation fails', async () => {
+
+
+        await fmlValidationInstance.validateWithPossibilityToChooseFiles();
+        (mockApi.callValidateStructureMap as SinonStub).resolves(false);
+
+        await fmlValidationInstance.validateWithPossibilityToChooseFiles();
+
+        assert.ok(
+            showErrorMessageStub.calledWith('Validation error occurred.'),
+            'Expected error message to be shown'
+        );
+    });
+
+    test('validateWithPossibilityToChooseFiles should show an information success message when validation succeed', async () => {
+
+
+        await fmlValidationInstance.validateWithPossibilityToChooseFiles();
+        (mockApi.callValidateStructureMap as SinonStub).resolves(true);
+
+        await fmlValidationInstance.validateWithPossibilityToChooseFiles();
+
+        assert.ok(
+            showInformationMessageStub.calledWith('Validation completed successfully.'),
+            'Expected validation succeed message to be shown'
+        );
+    });
+
+    test('should parse .fml file on change event', async () => {
+        const fakePath = path.resolve(__dirname, '../../src/test/fixtures/test.fml');
+
+        const parseStub = (mockApi.callParseStructureMap as sinon.SinonStub).resolves(true);
+
+        const nbFiles = await mapBuilderWatcherInstance.parseFmlFilesFromPath(fakePath);
+
+        assert.strictEqual(nbFiles, 1, 'Expected one file to be parsed');
+
+        parseStub.restore();
+    });
+
+    test('parseFmlFilesFromPath should return 0 if path is not a string', async () => {
+        const result = await mapBuilderWatcherInstance.parseFmlFilesFromPath({} as any);
+        assert.strictEqual(result, 0, 'Expected 0 when input path is not a string');
+    });
+
+    test('loadPackageAndParseFmlFiles should log engine message and parsed file count', async () => {
+        const engineMessage = 'Engine loaded successfully.';
+        const parsedCount = 2;
+
+        (mockApi.callResetAndLoadEngine as SinonStub).resolves(engineMessage);
+        const parseStub = sinon.stub(mapBuilderWatcherInstance, 'parseAllFmlFiles').resolves(parsedCount);
+
+        const loggerStub = sinon.stub(mapBuilderWatcherInstance['logger'], 'appendLine');
+
+        await mapBuilderWatcherInstance.loadPackageAndParseFmlFiles();
+
+        assert.ok(
+            loggerStub.calledWithMatch(`: ${engineMessage}`),
+            'Expected engine load message to be logged'
+        );
+
+        assert.ok(
+            loggerStub.calledWithMatch(`: ${parsedCount} files are parsed!`),
+            'Expected parsed file count to be logged'
+        );
+
+        parseStub.restore();
+        loggerStub.restore();
     });
 });
