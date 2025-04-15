@@ -40,7 +40,6 @@ suite('Extension Commands Test Suite', () => {
     let showWarningMessageStub: sinon.SinonStub;
     let showInformationMessageStub: sinon.SinonStub;
     let showErrorMessageStub: sinon.SinonStub;
-    //  let isPackagePathStub: sinon.SinonStub;
     let fmlValidationInstance: FmlValidation;
     let mapBuilderWatcherInstance: MapBuilderWatcher;
     let mockApi: MapBuilderValidationApi;
