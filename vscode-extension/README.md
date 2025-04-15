@@ -40,7 +40,7 @@ This function is called from an open fml file by right-clicking anywhere in the 
 
 After few seconds, the results are available in the **fml-generated** folder.
 
-![Validate StructureMap](ext-images/fhir-mapbuilder-validation-with-selection.gif)
+![Validate StructureMap](ext-images/validation-with-selection.gif)
 
 ### Validate StructureMap (Current input)
 
@@ -50,7 +50,7 @@ The json test file, selected during a previous execution, is used automatically.
 
 After few seconds, the results are available in the **fml-generated** folder.
 
-![Validate StructureMap](ext-images/fhir-mapbuilder-validation.gif)
+![Validate StructureMap](ext-images/validation.gif)
 
 ### Load current package and Validate StructureMap
 
@@ -60,7 +60,7 @@ After few seconds, the results are available in the **fml-generated** folder.
 
 After few seconds, the results are available in the **fml-generated** folder.
 
-![Validate StructureMap](ext-images/mapbuilder-load-engine.gif)
+![Validate StructureMap](ext-images/load-engine.gif)
 
 ### Troubleshoting
 The FHIR MapBuilder use the output/package.tgz file to configure the matchbox-engine, which is the standardized place to 
@@ -101,4 +101,3 @@ Autocompletion for attributes is triggered when an object is followed by a dot (
 ## 📜 License
 
 This project is licensed under the [MIT License](../LICENSE).
-
