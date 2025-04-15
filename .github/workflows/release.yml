@@ -1,0 +1,37 @@
+name: Package and Release VS Code Extension
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on tags like v1.0.0, v2.3.1, etc.
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: vscode-extension
+
+      - name: Install vsce
+        run: npm install -g vsce
+
+      - name: Package extension
+        run: vsce package --baseContentUrl https://github.com/aphp/fhir-mapbuilder.git
+        working-directory: vscode-extension
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: vscode-extension/*.vsix
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
